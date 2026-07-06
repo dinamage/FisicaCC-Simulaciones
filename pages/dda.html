@@ -5,13 +5,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DDA — Fuerza de un fluido sobre un dique</title>
   <link rel="stylesheet" href="../css/styles.css" />
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+      svg: { fontCache: 'global' }
+    };
+  </script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
 </head>
 <body>
   <header class="topbar">
     <a class="brand" href="../index.html">⚛️ Física Computacional</a>
     <nav class="nav">
       <a href="../index.html">Inicio</a>
-      <a href="dda.html">DDA</a>
+      <a class="active" href="dda.html">DDA</a>
       <a href="ddb.html">DDB</a>
       <a href="ddc.html">DDC</a>
       <a href="ddd.html">DDD</a>
@@ -19,69 +27,158 @@
   </header>
 
   <main class="container">
-    <section class="module-header">
-      <div class="section-card">
-        <span class="tag">Módulo</span>
-        <h1>DDA — Fuerza de un fluido sobre un dique</h1>
-        <p>Esta página queda preparada para conectar el código corregido, los controles interactivos y las gráficas finales.</p>
+    <section class="section-card module-title-card page-intro">
+      <span class="tag">DDA</span>
+      <h1>Fuerza de un fluido sobre un dique</h1>
+      <p>
+        Simulación de la fuerza total que ejerce un fluido en reposo sobre una pared vertical.
+        La presión cambia con la profundidad, por eso se integra la fuerza diferencial a lo
+        largo de la altura del fluido.
+      </p>
+    </section>
+
+    <section class="section-card">
+      <h2>1. Objetivo del fenómeno</h2>
+      <p>
+        Determinar la fuerza total que un fluido ejerce sobre un dique. La presión no es
+        uniforme: mientras más profundo está el punto analizado, mayor presión recibe la
+        pared. Por eso no basta usar una sola presión multiplicada por el área; se debe sumar
+        el aporte de muchas franjas horizontales del dique.
+      </p>
+    </section>
+
+    <section class="section-card">
+      <h2>2. Fórmulas físicas usadas</h2>
+      <div class="formula-grid">
+        <article class="formula-card">
+          <h3>Presión hidrostática variable</h3>
+          <p>Se usa porque la presión depende de la profundidad medida desde la superficie libre.</p>
+          <div class="formula">$$P(y)=\rho(y)\,g\,(H-y)$$</div>
+        </article>
+        <article class="formula-card">
+          <h3>Densidad del fluido</h3>
+          <p>El enunciado considera una densidad no constante, dependiente de la altura local.</p>
+          <div class="formula">$$\rho(y)=80\,(0.250y^3-y+10.0)$$</div>
+        </article>
+        <article class="formula-card">
+          <h3>Fuerza diferencial</h3>
+          <p>Cada franja horizontal del dique aporta una pequeña fuerza al total.</p>
+          <div class="formula">$$dF=P(y)\,dA=P(y)\,L\,dy$$</div>
+        </article>
+        <article class="formula-card">
+          <h3>Fuerza total</h3>
+          <p>La fuerza total se obtiene integrando todas las franjas desde la base hasta la altura H.</p>
+          <div class="formula">$$F_T=80gL\int_0^H(0.250y^3-y+10.0)(H-y)\,dy$$</div>
+        </article>
+        <article class="formula-card wide-formula">
+          <h3>Ecuación teórica de validación</h3>
+          <p>Sirve para comparar la aproximación numérica y calcular el porcentaje de error.</p>
+          <div class="formula">$$F_{teo}=80gL\left(0.0125H^3-\frac{H}{6}+5\right)H^2$$</div>
+        </article>
       </div>
-      <aside class="info-box">
-        <h3>Método numérico</h3>
-        <p>Regla del trapecio</p>
-      </aside>
     </section>
 
     <section class="section-card">
-      <h2>1. Fundamento físico</h2>
-      <p>Colocar aquí la explicación del fenómeno físico, variables principales y objetivo de la simulación.</p>
-    </section>
-
-    <section class="section-card">
-      <h2>2. Fórmulas principales</h2>
-      <p>Espacio reservado para las ecuaciones del modelo físico y del método numérico.</p>
+      <h2>3. Método numérico: regla del trapecio</h2>
+      <p>
+        La integral se aproxima dividiendo el intervalo $[0,H]$ en $n$ partes iguales.
+        Los extremos se cuentan una vez y los puntos interiores se cuentan dos veces,
+        porque cada punto interior pertenece a dos trapecios vecinos.
+      </p>
+      <div class="formula main-formula">
+        $$\int_a^b f(y)\,dy \approx \frac{h}{2}\left[f(y_0)+2f(y_1)+2f(y_2)+...+2f(y_{n-1})+f(y_n)\right]$$
+        $$h=\frac{H-0}{n}$$
+      </div>
     </section>
 
     <section class="layout">
       <aside class="section-card controls">
-        <h2>3. Parámetros</h2>
-        <label>Parámetro 1</label>
-        <input type="range" min="0" max="10" value="5" />
-        <label>Parámetro 2</label>
-        <input type="range" min="0" max="10" value="5" />
-        <label>Parámetro 3</label>
-        <input type="range" min="0" max="10" value="5" />
+        <h2>4. Parámetros interactivos</h2>
+        <p class="muted-small">Modifica los valores y observa cómo cambian la fuerza, el error y la gráfica.</p>
+
+        <label for="inputL">Longitud del dique L: <strong id="labelL">2.20 m</strong></label>
+        <input id="inputL" type="range" min="1.50" max="3.50" step="0.01" value="2.20" />
+
+        <label for="inputH">Altura del fluido H: <strong id="labelH">3.00 m</strong></label>
+        <input id="inputH" type="range" min="1.00" max="4.80" step="0.01" value="3.00" />
+
+        <label for="inputN">Número de trapecios n: <strong id="labelN">6</strong></label>
+        <input id="inputN" type="range" min="2" max="40" step="1" value="6" />
+
+        <div class="parameter-note">
+          <strong>Valores usados en el reporte:</strong><br />
+          L = 2.20 m, H = 3.00 m y n = 6.
+        </div>
       </aside>
 
-      <section class="section-card">
-        <h2>4. Gráfica interactiva</h2>
-        <div id="grafica" class="placeholder-graph">
-          Aquí irá la gráfica con Plotly cuando conectemos el código corregido.
-        </div>
+      <section class="section-card graph-card">
+        <h2>5. Gráfica interactiva</h2>
+        <p class="muted-small">
+          Comparación entre la fuerza total calculada con la regla del trapecio y la ecuación teórica.
+        </p>
+        <div id="graficaDDA" class="plot-container"></div>
       </section>
     </section>
 
     <section class="section-card">
-      <h2>5. Resultados</h2>
+      <h2>6. Resultados</h2>
       <div class="result-grid">
-        <div class="result-item">Resultado numérico <strong>--</strong></div>
-        <div class="result-item">Resultado teórico <strong>--</strong></div>
-        <div class="result-item">Error porcentual <strong>--</strong></div>
+        <div class="result-item">Fuerza por trapecio <strong id="resultadoTrapecio">--</strong></div>
+        <div class="result-item">Fuerza teórica <strong id="resultadoTeorico">--</strong></div>
+        <div class="result-item">Error porcentual <strong id="resultadoError">--</strong></div>
       </div>
+      <div id="mensajeValidacion" class="validation-message"></div>
     </section>
 
     <section class="section-card">
-      <h2>6. Código matemático principal</h2>
-      <pre class="code-block"><code>// Aquí colocaremos el núcleo del algoritmo corregido.
-function calcular() {
-  // parámetros
-  // método numérico
-  // resultados
+      <h2>7. Código matemático principal</h2>
+      <p>
+        Este fragmento muestra el núcleo del modelo: primero se define el integrando físico,
+        luego se aplica la regla del trapecio y finalmente se compara con la ecuación teórica.
+      </p>
+      <pre class="code-block"><code>const g = 9.81;
+
+function funcionIntegral(y, H) {
+  return (0.250 * y ** 3 - y + 10.0) * (H - y);
+}
+
+function fuerzaTrapecio(H, L, n) {
+  const h = H / n;
+  let suma = funcionIntegral(0, H) + funcionIntegral(H, H);
+
+  for (let i = 1; i &lt; n; i++) {
+    const y = i * h;
+    suma += 2 * funcionIntegral(y, H);
+  }
+
+  const integral = (h / 2) * suma;
+  return 80.0 * g * L * integral;
+}
+
+function fuerzaTeorica(H, L) {
+  return 80.0 * g * L * (0.0125 * H ** 3 - H / 6 + 5) * H ** 2;
 }</code></pre>
     </section>
 
     <section class="section-card">
-      <h2>7. Análisis y conclusiones</h2>
-      <p>Espacio reservado para la interpretación física de los resultados.</p>
+      <h2>8. Análisis y conclusiones</h2>
+      <div class="analysis-grid">
+        <div class="analysis-card success-card">
+          <h3>Resultado principal</h3>
+          <p>
+            Con los valores del reporte, la fuerza calculada por trapecios es muy cercana a la
+            fuerza teórica. El error es menor al 2%, por lo que la cantidad de trapecios usada
+            es válida para esta simulación.
+          </p>
+        </div>
+        <div class="analysis-card">
+          <h3>Interpretación física</h3>
+          <p>
+            La fuerza aumenta al crecer H porque se incrementa la profundidad del fluido y,
+            por lo tanto, también aumenta la presión promedio ejercida sobre el dique.
+          </p>
+        </div>
+      </div>
     </section>
   </main>
 
