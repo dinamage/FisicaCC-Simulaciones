@@ -5,6 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DDD — Espejismos y refracción de la luz</title>
   <link rel="stylesheet" href="../css/styles.css" />
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+      svg: { fontCache: 'global' }
+    };
+  </script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
 </head>
 <body>
   <header class="topbar">
@@ -14,74 +22,223 @@
       <a href="dda.html">DDA</a>
       <a href="ddb.html">DDB</a>
       <a href="ddc.html">DDC</a>
-      <a href="ddd.html">DDD</a>
+      <a class="active" href="ddd.html">DDD</a>
     </nav>
   </header>
 
   <main class="container">
-    <section class="module-header">
-      <div class="section-card">
-        <span class="tag">Módulo</span>
-        <h1>DDD — Espejismos y refracción de la luz</h1>
-        <p>Esta página queda preparada para conectar el código corregido, los controles interactivos y las gráficas finales.</p>
+    <section class="section-card module-title-card page-intro">
+      <span class="tag">DDD</span>
+      <h1>Espejismos y refracción de la luz</h1>
+      <p>
+        Simulación de la trayectoria de un rayo de luz en un medio cuyo índice de refracción
+        cambia con la altura. El modelo permite observar la curvatura del rayo, la evolución
+        del ángulo y comparar la altura mínima simulada con la altura mínima teórica.
+      </p>
+    </section>
+
+    <section class="section-card">
+      <h2>1. Objetivo del fenómeno</h2>
+      <p>
+        Obtener la trayectoria continua de un rayo de luz en un medio heterogéneo donde el
+        índice de refracción varía con la altura. En este caso se estudia el espejismo inferior:
+        el rayo desciende, se curva progresivamente y alcanza una altura mínima antes de volver
+        a elevarse.
+      </p>
+    </section>
+
+    <section class="section-card">
+      <h2>2. Fórmulas físicas usadas</h2>
+      <div class="formula-grid">
+        <article class="formula-card">
+          <h3>Índice de refracción variable</h3>
+          <p>
+            Se usa para modelar que el medio no es homogéneo. El índice depende solo de la altura,
+            lo que representa una variación térmica vertical del aire.
+          </p>
+          <div class="formula">$$n(y)=n_0+\alpha y$$</div>
+        </article>
+
+        <article class="formula-card">
+          <h3>Ecuación cinemática del rayo</h3>
+          <p>
+            Relaciona el cambio de la altura del rayo con el ángulo local de inclinación respecto
+            al eje horizontal.
+          </p>
+          <div class="formula">$$\frac{dy}{dx}=\tan\theta$$</div>
+        </article>
+
+        <article class="formula-card">
+          <h3>Ecuación dinámica del rayo</h3>
+          <p>
+            Describe cómo cambia el ángulo a medida que el rayo avanza en el medio con gradiente
+            vertical de índice de refracción.
+          </p>
+          <div class="formula">$$\frac{d\theta}{dx}=\frac{1}{n(y)}\frac{dn}{dy}$$</div>
+        </article>
+
+        <article class="formula-card">
+          <h3>Invariante de Snell</h3>
+          <p>
+            Permite analizar el punto de retorno del rayo cuando este se nivela y se produce la
+            reflexión geométrica asociada al espejismo.
+          </p>
+          <div class="formula">$$n(y)\cos\theta=n(y_0)\cos\theta_0$$</div>
+        </article>
+
+        <article class="formula-card wide-formula">
+          <h3>Altura mínima teórica del rayo</h3>
+          <p>
+            Se obtiene imponiendo la condición de retorno $\theta=0$. Esta expresión sirve para
+            comparar el resultado numérico con el valor teórico y calcular el porcentaje de error.
+          </p>
+          <div class="formula">$$y_{min}=\frac{\left(n_0+\alpha y_0\right)\cos\theta_0-n_0}{\alpha}$$</div>
+        </article>
+
+        <article class="formula-card wide-formula">
+          <h3>Condición de existencia del espejismo</h3>
+          <p>
+            Esta desigualdad garantiza que exista una altura mínima físicamente accesible antes de
+            que el rayo alcance el suelo.
+          </p>
+          <div class="formula">$$\alpha>\frac{n_0\left(1-\cos\theta_0\right)}{y_0\cos\theta_0}$$</div>
+        </article>
       </div>
-      <aside class="info-box">
-        <h3>Método numérico</h3>
-        <p>Runge-Kutta de cuarto orden</p>
-      </aside>
     </section>
 
     <section class="section-card">
-      <h2>1. Fundamento físico</h2>
-      <p>Colocar aquí la explicación del fenómeno físico, variables principales y objetivo de la simulación.</p>
+      <h2>3. Método numérico: Runge–Kutta de cuarto orden (RK4)</h2>
+      <p>
+        El sistema se escribe en forma vectorial con el estado $\vec{u}(x)=\big(y(x),\theta(x)\big)$.
+        En cada paso se calculan cuatro pendientes intermedias y se construye un promedio ponderado
+        que mejora la precisión respecto a un método simple de Euler.
+      </p>
+      <div class="formula main-formula">
+        $$\vec{k}_1=F(x_i,\vec{u}_i)$$
+        $$\vec{k}_2=F\left(x_i+\frac{h}{2},\vec{u}_i+\frac{h}{2}\vec{k}_1\right)$$
+        $$\vec{k}_3=F\left(x_i+\frac{h}{2},\vec{u}_i+\frac{h}{2}\vec{k}_2\right)$$
+        $$\vec{k}_4=F\left(x_i+h,\vec{u}_i+h\vec{k}_3\right)$$
+        $$\vec{u}_{i+1}=\vec{u}_i+\frac{h}{6}(\vec{k}_1+2\vec{k}_2+2\vec{k}_3+\vec{k}_4)$$
+      </div>
     </section>
 
-    <section class="section-card">
-      <h2>2. Fórmulas principales</h2>
-      <p>Espacio reservado para las ecuaciones del modelo físico y del método numérico.</p>
-    </section>
+    <section class="section-card controls ddb-controls-panel">
+      <h2>4. Parámetros de la simulación</h2>
+      <p class="muted-small">
+        Para que la simulación sea más clara en exposición, se dejan como interactivos los parámetros
+        que cambian directamente la curvatura del rayo y la altura inicial. El valor inicial de α se coloca por encima del valor crítico para garantizar el espejismo. Los demás valores se
+        mantienen fijos con los datos del reporte corregido.
+      </p>
 
-    <section class="layout">
-      <aside class="section-card controls">
-        <h2>3. Parámetros</h2>
-        <label>Parámetro 1</label>
-        <input type="range" min="0" max="10" value="5" />
-        <label>Parámetro 2</label>
-        <input type="range" min="0" max="10" value="5" />
-        <label>Parámetro 3</label>
-        <input type="range" min="0" max="10" value="5" />
-      </aside>
+      <div class="controls-grid ddc-simple-controls-grid">
+        <div>
+          <h3>Parámetros interactivos</h3>
 
-      <section class="section-card">
-        <h2>4. Gráfica interactiva</h2>
-        <div id="grafica" class="placeholder-graph">
-          Aquí irá la gráfica con Plotly cuando conectemos el código corregido.
+          <label for="inputAlpha">Constante de variación α: <strong id="labelAlpha">3.00 × 10⁻³ m⁻¹</strong></label>
+          <input id="inputAlpha" type="range" min="1.00" max="9.00" step="0.01" value="3.00" />
+
+          <label for="inputTheta0">Ángulo inicial θ₀: <strong id="labelTheta0">-0.100 rad</strong></label>
+          <input id="inputTheta0" type="range" min="-0.200" max="-0.100" step="0.001" value="-0.100" />
+
+          <label for="inputY0">Altura inicial y₀: <strong id="labelY0">3.00 m</strong></label>
+          <input id="inputY0" type="range" min="1.00" max="5.00" step="0.01" value="3.00" />
         </div>
-      </section>
-    </section>
 
-    <section class="section-card">
-      <h2>5. Resultados</h2>
-      <div class="result-grid">
-        <div class="result-item">Resultado numérico <strong>--</strong></div>
-        <div class="result-item">Resultado teórico <strong>--</strong></div>
-        <div class="result-item">Error porcentual <strong>--</strong></div>
+        <div>
+          <h3>Parámetros fijos del experimento</h3>
+          <div class="fixed-params-grid">
+            <div>Índice base n₀ <strong>1.00030</strong></div>
+            <div>Condición inicial x₀ <strong>0.00 m</strong></div>
+            <div>Condición final x<sub>f</sub> <strong>60.0 m</strong></div>
+            <div>Paso RK4 Δx <strong>3.00 × 10⁻³ m</strong></div>
+          </div>
+        </div>
       </div>
     </section>
 
     <section class="section-card">
-      <h2>6. Código matemático principal</h2>
-      <pre class="code-block"><code>// Aquí colocaremos el núcleo del algoritmo corregido.
-function calcular() {
-  // parámetros
-  // método numérico
-  // resultados
-}</code></pre>
+      <h2>5. Resultados de la simulación</h2>
+      <div class="result-grid">
+        <div class="result-item">Altura mínima simulada <strong id="resultadoYMinSim">--</strong></div>
+        <div class="result-item">Posición del mínimo <strong id="resultadoXMin">--</strong></div>
+        <div class="result-item">Altura mínima teórica <strong id="resultadoYMinTeo">--</strong></div>
+        <div class="result-item">Error porcentual <strong id="resultadoErrorDDD">--</strong></div>
+        <div class="result-item">Ángulo en el retorno <strong id="resultadoThetaMin">--</strong></div>
+        <div class="result-item">Número de pasos <strong id="resultadoPasos">--</strong></div>
+      </div>
+      <div id="mensajeEspejismo" class="validation-message"></div>
+    </section>
+
+    <section class="charts-grid">
+      <article class="section-card graph-card wide-chart">
+        <h2>6.1 Trayectoria del rayo de luz: y vs x</h2>
+        <p class="muted-small">
+          La curva muestra cómo el rayo se aproxima al suelo, alcanza una altura mínima y luego cambia de tendencia.
+        </p>
+        <div id="graficaDDDTrayectoria" class="plot-container"></div>
+      </article>
+
+      <article class="section-card graph-card wide-chart">
+        <h2>6.2 Evolución angular del rayo: θ vs x</h2>
+        <p class="muted-small">
+          El ángulo evoluciona hasta aproximarse a cero en el punto de retorno geométrico del espejismo.
+        </p>
+        <div id="graficaDDDAngulo" class="plot-container"></div>
+      </article>
     </section>
 
     <section class="section-card">
-      <h2>7. Análisis y conclusiones</h2>
-      <p>Espacio reservado para la interpretación física de los resultados.</p>
+      <h2>7. Código matemático principal</h2>
+      <p>
+        Este fragmento resume el núcleo del código en Python: definición del sistema, integración
+        con RK4 y obtención de la altura mínima simulada del rayo.
+      </p>
+      <pre class="code-block"><code>function nOfY(y, n0, alpha) {
+  return n0 + alpha * y;
+}
+
+function F(u, n0, alpha) {
+  const [y, theta] = u;
+  const dydx = Math.tan(theta);
+  const dthetadx = alpha / nOfY(y, n0, alpha);
+  return [dydx, dthetadx];
+}
+
+for (let i = 0; i &lt; N; i++) {
+  const k1 = F(u, n0, alpha);
+  const k2 = F([u[0] + (h / 2) * k1[0], u[1] + (h / 2) * k1[1]], n0, alpha);
+  const k3 = F([u[0] + (h / 2) * k2[0], u[1] + (h / 2) * k2[1]], n0, alpha);
+  const k4 = F([u[0] + h * k3[0], u[1] + h * k3[1]], n0, alpha);
+
+  u = [
+    u[0] + (h / 6) * (k1[0] + 2 * k2[0] + 2 * k3[0] + k4[0]),
+    u[1] + (h / 6) * (k1[1] + 2 * k2[1] + 2 * k3[1] + k4[1])
+  ];
+}
+
+const yMinTeo = (((n0 + alpha * y0) * Math.cos(theta0)) - n0) / alpha;
+const error = Math.abs(yMinTeo - yMinSim) / yMinTeo * 100;</code></pre>
+    </section>
+
+    <section class="section-card">
+      <h2>8. Análisis y conclusiones</h2>
+      <div class="analysis-grid">
+        <div class="analysis-card success-card">
+          <h3>Validación del método</h3>
+          <p>
+            La altura mínima obtenida con RK4 debe ser muy cercana a la altura mínima teórica.
+            Un error pequeño indica que el método reproduce adecuadamente la curvatura del rayo.
+          </p>
+        </div>
+        <div class="analysis-card">
+          <h3>Interpretación física</h3>
+          <p>
+            Como el índice de refracción cambia con la altura, el rayo no sigue una línea recta.
+            Su trayectoria se curva de manera continua hasta alcanzar un punto de retorno, fenómeno
+            característico del espejismo inferior.
+          </p>
+        </div>
+      </div>
     </section>
   </main>
 
