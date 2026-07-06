@@ -5,6 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DDB — Campo eléctrico de una distribución continua</title>
   <link rel="stylesheet" href="../css/styles.css" />
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+      svg: { fontCache: 'global' }
+    };
+  </script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
 </head>
 <body>
   <header class="topbar">
@@ -12,76 +20,195 @@
     <nav class="nav">
       <a href="../index.html">Inicio</a>
       <a href="dda.html">DDA</a>
-      <a href="ddb.html">DDB</a>
+      <a class="active" href="ddb.html">DDB</a>
       <a href="ddc.html">DDC</a>
       <a href="ddd.html">DDD</a>
     </nav>
   </header>
 
   <main class="container">
-    <section class="module-header">
-      <div class="section-card">
-        <span class="tag">Módulo</span>
-        <h1>DDB — Campo eléctrico de una distribución continua</h1>
-        <p>Esta página queda preparada para conectar el código corregido, los controles interactivos y las gráficas finales.</p>
+    <section class="section-card module-title-card page-intro">
+      <span class="tag">DDB</span>
+      <h1>Campo eléctrico de una distribución continua de carga</h1>
+      <p>
+        Simulación del campo eléctrico producido por una barra cargada muy larga. El campo se
+        calcula de dos formas: mediante una aproximación numérica por elementos de carga y
+        mediante el modelo teórico de una línea infinita de carga.
+      </p>
+    </section>
+
+    <section class="section-card">
+      <h2>1. Objetivo del fenómeno</h2>
+      <p>
+        Reproducir cómo cambia el campo eléctrico $E$ cuando se modifica la distancia $x$ entre
+        el punto de observación y una barra con carga distribuida uniformemente. El objetivo
+        principal es comparar el cálculo numérico con la expresión teórica y verificar que ambas
+        curvas presenten el mismo comportamiento físico.
+      </p>
+    </section>
+
+    <section class="section-card">
+      <h2>2. Fórmulas físicas usadas</h2>
+      <div class="formula-grid">
+        <article class="formula-card">
+          <h3>Campo de una carga puntual</h3>
+          <p>
+            Se usa como punto de partida porque la barra se divide en muchos elementos pequeños
+            de carga, y cada uno se trata como una carga puntual.
+          </p>
+          <div class="formula">$$dE=\frac{k\,dq}{r^2}$$</div>
+        </article>
+
+        <article class="formula-card">
+          <h3>Densidad lineal de carga</h3>
+          <p>
+            Relaciona la carga diferencial con un pequeño tramo de la barra. Permite convertir
+            la distribución continua en elementos discretos.
+          </p>
+          <div class="formula">$$dq=\lambda\,dy$$</div>
+        </article>
+
+        <article class="formula-card">
+          <h3>Distancia al punto de observación</h3>
+          <p>
+            El elemento de carga está en la posición $y_i$ y el punto de observación está a una
+            distancia horizontal $x$ de la barra.
+          </p>
+          <div class="formula">$$r_i=\sqrt{x^2+y_i^2}$$</div>
+        </article>
+
+        <article class="formula-card">
+          <h3>Componente horizontal del campo</h3>
+          <p>
+            Por simetría, las componentes verticales se cancelan. Por eso se suma solo la
+            componente horizontal $E_x$.
+          </p>
+          <div class="formula">$$E_x=\sum 2\,\frac{k\lambda x\Delta y}{(y_i^2+x^2)^{3/2}}$$</div>
+        </article>
+
+        <article class="formula-card wide-formula">
+          <h3>Modelo teórico de una línea infinita de carga</h3>
+          <p>
+            Sirve como referencia para validar el resultado numérico. Muestra que el campo
+            eléctrico disminuye de forma inversamente proporcional a la distancia $x$.
+          </p>
+          <div class="formula">$$E_{teo}=\frac{\lambda}{2\pi\varepsilon_0 x}$$</div>
+        </article>
       </div>
-      <aside class="info-box">
-        <h3>Método numérico</h3>
-        <p>Regla del trapecio</p>
-      </aside>
     </section>
 
     <section class="section-card">
-      <h2>1. Fundamento físico</h2>
-      <p>Colocar aquí la explicación del fenómeno físico, variables principales y objetivo de la simulación.</p>
+      <h2>3. Método numérico: discretización de la barra</h2>
+      <p>
+        La barra se aproxima como una colección de pequeños elementos de carga separados por
+        $\Delta y$. Para cada distancia $x$, el algoritmo suma el aporte de todos los elementos
+        desde $y=0$ hasta un valor suficientemente grande y multiplica por 2 para considerar la
+        simetría de la barra respecto al eje horizontal.
+      </p>
+      <div class="formula main-formula">
+        $$E_{num}(x)=\sum_{i=0}^{N} 2\,\frac{k\lambda x\Delta y}{(y_i^2+x^2)^{3/2}}$$
+        $$y_i=i\Delta y$$
+      </div>
+      <p class="muted-small">
+        En el código corregido se usa $\Delta y=0.01\,m$ y un límite $y_{max}=1000\,m$ para
+        aproximar la barra infinita.
+      </p>
     </section>
 
-    <section class="section-card">
-      <h2>2. Fórmulas principales</h2>
-      <p>Espacio reservado para las ecuaciones del modelo físico y del método numérico.</p>
-    </section>
+    <section class="section-card controls ddb-controls-panel">
+      <h2>4. Parámetros interactivos</h2>
+      <p class="muted-small">El rango de la densidad lineal sigue el enunciado de la actividad.</p>
 
-    <section class="layout">
-      <aside class="section-card controls">
-        <h2>3. Parámetros</h2>
-        <label>Parámetro 1</label>
-        <input type="range" min="0" max="10" value="5" />
-        <label>Parámetro 2</label>
-        <input type="range" min="0" max="10" value="5" />
-        <label>Parámetro 3</label>
-        <input type="range" min="0" max="10" value="5" />
-      </aside>
-
-      <section class="section-card">
-        <h2>4. Gráfica interactiva</h2>
-        <div id="grafica" class="placeholder-graph">
-          Aquí irá la gráfica con Plotly cuando conectemos el código corregido.
+      <div class="controls-grid">
+        <div>
+          <label for="inputLambda">Densidad lineal $\lambda$: <strong id="labelLambda">50.0 × 10⁻⁹ C/m</strong></label>
+          <input id="inputLambda" type="range" min="20" max="80" step="0.1" value="50" />
         </div>
-      </section>
-    </section>
 
-    <section class="section-card">
-      <h2>5. Resultados</h2>
-      <div class="result-grid">
-        <div class="result-item">Resultado numérico <strong>--</strong></div>
-        <div class="result-item">Resultado teórico <strong>--</strong></div>
-        <div class="result-item">Error porcentual <strong>--</strong></div>
+        <div class="parameter-note compact-note">
+          <strong>Valores del reporte:</strong><br />
+          $\lambda=50.0\times10^{-9}\,C/m$, $\Delta y=0.01\,m$ y $2.00\le x\le80.0\,m$.
+        </div>
       </div>
     </section>
 
     <section class="section-card">
-      <h2>6. Código matemático principal</h2>
-      <pre class="code-block"><code>// Aquí colocaremos el núcleo del algoritmo corregido.
-function calcular() {
-  // parámetros
-  // método numérico
-  // resultados
+      <h2>5. Resultados de referencia</h2>
+      <div class="result-grid">
+        <div class="result-item">$E_{num}$ en x = 2.00 m <strong id="resultadoNumerico">--</strong></div>
+        <div class="result-item">$E_{teo}$ en x = 2.00 m <strong id="resultadoTeorico">--</strong></div>
+        <div class="result-item">Diferencia relativa <strong id="resultadoDiferencia">--</strong></div>
+      </div>
+    </section>
+
+    <section class="charts-grid ddb-charts-grid">
+      <article class="section-card graph-card">
+        <h2>6.1 Campo eléctrico — método numérico</h2>
+        <p class="muted-small">Curva obtenida sumando el aporte de los elementos de carga.</p>
+        <div id="graficaDDBNumerico" class="plot-container compact-plot"></div>
+      </article>
+
+      <article class="section-card graph-card">
+        <h2>6.2 Campo eléctrico — modelo teórico</h2>
+        <p class="muted-small">Curva calculada con la expresión teórica de una barra infinita.</p>
+        <div id="graficaDDBTeorico" class="plot-container compact-plot"></div>
+      </article>
+
+      <article class="section-card graph-card wide-chart">
+        <h2>6.3 Comparación numérica y teórica</h2>
+        <p class="muted-small">Ambas curvas se muestran juntas para analizar su semejanza.</p>
+        <div id="graficaDDBComparacion" class="plot-container"></div>
+      </article>
+    </section>
+
+    <section class="section-card">
+      <h2>7. Código matemático principal</h2>
+      <p>
+        Este fragmento resume el núcleo del algoritmo: se define el modelo teórico, luego se
+        calcula la suma numérica de los elementos de carga y finalmente se generan los datos
+        para las tres gráficas.
+      </p>
+      <pre class="code-block"><code>const k = 9.00e9;
+const epsilon0 = 8.85e-12;
+const dy = 0.01;
+const yMax = 1000;
+
+function campoTeorico(x, lambda) {
+  return lambda / (2 * Math.PI * epsilon0 * x);
+}
+
+function campoNumerico(x, lambda) {
+  let E = 0;
+
+  for (let y = 0; y &lt; yMax; y += dy) {
+    E += 2 * (k * lambda * x * dy) /
+      ((y ** 2 + x ** 2) ** 1.5);
+  }
+
+  return E;
 }</code></pre>
     </section>
 
     <section class="section-card">
-      <h2>7. Análisis y conclusiones</h2>
-      <p>Espacio reservado para la interpretación física de los resultados.</p>
+      <h2>8. Análisis y conclusiones</h2>
+      <div class="analysis-grid">
+        <div class="analysis-card success-card">
+          <h3>Comparación de curvas</h3>
+          <p>
+            El método numérico reproduce el mismo comportamiento que el modelo teórico. Las
+            curvas disminuyen conforme aumenta la distancia $x$ y se mantienen prácticamente
+            superpuestas en la comparación.
+          </p>
+        </div>
+        <div class="analysis-card">
+          <h3>Interpretación física</h3>
+          <p>
+            El campo eléctrico es mayor cerca de la barra porque la distancia al punto de
+            observación es menor. Al alejarse, el campo disminuye de forma inversamente
+            proporcional a $x$.
+          </p>
+        </div>
+      </div>
     </section>
   </main>
 
