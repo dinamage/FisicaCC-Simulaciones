@@ -5,6 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DDC — Ondas estacionarias en una cuerda</title>
   <link rel="stylesheet" href="../css/styles.css" />
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+      svg: { fontCache: 'global' }
+    };
+  </script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
 </head>
 <body>
   <header class="topbar">
@@ -13,75 +21,217 @@
       <a href="../index.html">Inicio</a>
       <a href="dda.html">DDA</a>
       <a href="ddb.html">DDB</a>
-      <a href="ddc.html">DDC</a>
+      <a class="active" href="ddc.html">DDC</a>
       <a href="ddd.html">DDD</a>
     </nav>
   </header>
 
   <main class="container">
-    <section class="module-header">
-      <div class="section-card">
-        <span class="tag">Módulo</span>
-        <h1>DDC — Ondas estacionarias en una cuerda</h1>
-        <p>Esta página queda preparada para conectar el código corregido, los controles interactivos y las gráficas finales.</p>
+    <section class="section-card module-title-card page-intro">
+      <span class="tag">DDC</span>
+      <h1>Ondas estacionarias y modos normales en una cuerda tensa</h1>
+      <p>
+        Simulación de una cuerda fija en ambos extremos. El modelo permite observar el modo
+        estacionario elegido, analizar la amplitud en un antinodo y comparar la frecuencia
+        simulada con la frecuencia teórica del sistema.
+      </p>
+    </section>
+
+    <section class="section-card">
+      <h2>1. Objetivo del fenómeno</h2>
+      <p>
+        Analizar la formación de ondas estacionarias en una cuerda tensa y determinar la
+        frecuencia de oscilación. La simulación calcula el perfil espacial de la cuerda en
+        diferentes instantes y registra la evolución temporal de un antinodo.
+      </p>
+    </section>
+
+    <section class="section-card">
+      <h2>2. Fórmulas físicas usadas</h2>
+      <div class="formula-grid">
+        <article class="formula-card">
+          <h3>Rapidez de propagación</h3>
+          <p>
+            Se usa porque la velocidad de la onda depende de la tensión aplicada y de la masa
+            por unidad de longitud de la cuerda.
+          </p>
+          <div class="formula">$$v=\sqrt{\frac{F_T}{\mu}}$$</div>
+        </article>
+
+        <article class="formula-card">
+          <h3>Frecuencia del modo normal</h3>
+          <p>
+            Relaciona el número de modo $n$ con la rapidez de propagación y la longitud de la
+            cuerda. Sirve como valor teórico de comparación.
+          </p>
+          <div class="formula">$$f_n=n\frac{v}{2L}$$</div>
+        </article>
+
+        <article class="formula-card">
+          <h3>Periodo de oscilación</h3>
+          <p>
+            Permite elegir los instantes donde se extraen los perfiles de la cuerda y calcular
+            la frecuencia simulada a partir de máximos consecutivos.
+          </p>
+          <div class="formula">$$T=\frac{1}{f_n}$$</div>
+        </article>
+
+        <article class="formula-card">
+          <h3>Antinodo elegido</h3>
+          <p>
+            Para el primer vientre del modo $n$, se toma la posición donde la amplitud es máxima.
+            En el caso del reporte, con $L=3.00\,m$ y $n=5$, resulta $x=0.300\,m$.
+          </p>
+          <div class="formula">$$x_{antinodo}=\frac{L}{2n}$$</div>
+        </article>
+
+        <article class="formula-card wide-formula">
+          <h3>Ecuación de onda en una cuerda</h3>
+          <p>
+            Es el modelo físico que describe cómo cambia el desplazamiento transversal de la
+            cuerda en el espacio y en el tiempo.
+          </p>
+          <div class="formula">$$\frac{\partial^2 y}{\partial t^2}=v^2\frac{\partial^2 y}{\partial x^2}$$</div>
+        </article>
       </div>
-      <aside class="info-box">
-        <h3>Método numérico</h3>
-        <p>Diferencias finitas de segundo orden</p>
-      </aside>
     </section>
 
     <section class="section-card">
-      <h2>1. Fundamento físico</h2>
-      <p>Colocar aquí la explicación del fenómeno físico, variables principales y objetivo de la simulación.</p>
+      <h2>3. Método numérico: diferencias finitas de segundo orden</h2>
+      <p>
+        La cuerda se divide en puntos separados por $\Delta x$ y se avanza en el tiempo con un
+        paso $\Delta t$. El método aproxima las segundas derivadas de la ecuación de onda y
+        calcula el desplazamiento futuro usando los dos estados anteriores de la cuerda.
+      </p>
+      <div class="formula main-formula">
+        $$y_i^{j+1}=2y_i^j-y_i^{j-1}+\alpha^2\left(y_{i+1}^j-2y_i^j+y_{i-1}^j\right)$$
+        $$\alpha=\frac{v\Delta t}{\Delta x}$$
+      </div>
+      <p class="muted-small">
+        Para evitar inestabilidad numérica se usa $\alpha\le1$. En esta simulación se toma
+        $\Delta t=0.90\,\Delta x/v$, por lo que $\alpha=0.90$.
+      </p>
     </section>
 
-    <section class="section-card">
-      <h2>2. Fórmulas principales</h2>
-      <p>Espacio reservado para las ecuaciones del modelo físico y del método numérico.</p>
-    </section>
+    <section class="section-card controls ddb-controls-panel">
+      <h2>4. Parámetros de la simulación</h2>
+      <p class="muted-small">
+        Para que la explicación sea más clara, solo se modifican los parámetros que cambian
+        directamente la visualización del modo estacionario. Los demás valores se mantienen
+        fijos con los datos del reporte corregido.
+      </p>
 
-    <section class="layout">
-      <aside class="section-card controls">
-        <h2>3. Parámetros</h2>
-        <label>Parámetro 1</label>
-        <input type="range" min="0" max="10" value="5" />
-        <label>Parámetro 2</label>
-        <input type="range" min="0" max="10" value="5" />
-        <label>Parámetro 3</label>
-        <input type="range" min="0" max="10" value="5" />
-      </aside>
+      <div class="controls-grid ddc-simple-controls-grid">
+        <div>
+          <h3>Parámetros interactivos</h3>
 
-      <section class="section-card">
-        <h2>4. Gráfica interactiva</h2>
-        <div id="grafica" class="placeholder-graph">
-          Aquí irá la gráfica con Plotly cuando conectemos el código corregido.
+          <label for="inputModo">Modo de oscilación n: <strong id="labelModo">5</strong></label>
+          <input id="inputModo" type="range" min="3" max="7" step="1" value="5" />
+
+          <label for="inputA">Amplitud de la fuente A: <strong id="labelA">3.00 cm</strong></label>
+          <input id="inputA" type="range" min="2.00" max="5.00" step="0.01" value="3.00" />
         </div>
-      </section>
-    </section>
 
-    <section class="section-card">
-      <h2>5. Resultados</h2>
-      <div class="result-grid">
-        <div class="result-item">Resultado numérico <strong>--</strong></div>
-        <div class="result-item">Resultado teórico <strong>--</strong></div>
-        <div class="result-item">Error porcentual <strong>--</strong></div>
+        <div>
+          <h3>Parámetros fijos del experimento</h3>
+          <div class="fixed-params-grid">
+            <div>Longitud L <strong>3.00 m</strong></div>
+            <div>Tensión $F_T$ <strong>150 N</strong></div>
+            <div>Densidad $\mu$ <strong>2.00 × 10⁻³ kg/m</strong></div>
+            <div>Intervalo $\Delta x$ <strong>1.00 × 10⁻² m</strong></div>
+          </div>
+        </div>
       </div>
     </section>
 
     <section class="section-card">
-      <h2>6. Código matemático principal</h2>
-      <pre class="code-block"><code>// Aquí colocaremos el núcleo del algoritmo corregido.
-function calcular() {
-  // parámetros
-  // método numérico
-  // resultados
-}</code></pre>
+      <h2>5. Resultados de la simulación</h2>
+      <div class="result-grid ddc-result-grid">
+        <div class="result-item">Rapidez de onda <strong id="resultadoVelocidad">--</strong></div>
+        <div class="result-item">Frecuencia teórica <strong id="resultadoFTeo">--</strong></div>
+        <div class="result-item">Frecuencia simulada <strong id="resultadoFSim">--</strong></div>
+        <div class="result-item">Error porcentual <strong id="resultadoError">--</strong></div>
+        <div class="result-item">Antinodo usado <strong id="resultadoAntinodo">--</strong></div>
+        <div class="result-item">Número de Courant <strong id="resultadoAlpha">--</strong></div>
+      </div>
+    </section>
+
+    <section class="charts-grid ddc-charts-grid">
+      <article class="section-card graph-card wide-chart">
+        <h2>6.1 Perfil de la cuerda en estado estacionario</h2>
+        <p class="muted-small">
+          Se muestran cinco perfiles separados por un cuarto de periodo, después del tiempo de estabilización.
+        </p>
+        <div id="graficaDDCPerfiles" class="plot-container"></div>
+      </article>
+
+      <article class="section-card graph-card wide-chart">
+        <h2>6.2 Amplitud vs tiempo en el antinodo</h2>
+        <p class="muted-small">
+          La señal se usa para encontrar dos máximos consecutivos y calcular la frecuencia simulada.
+        </p>
+        <div id="graficaDDCAmplitud" class="plot-container"></div>
+      </article>
     </section>
 
     <section class="section-card">
-      <h2>7. Análisis y conclusiones</h2>
-      <p>Espacio reservado para la interpretación física de los resultados.</p>
+      <h2>7. Código matemático principal</h2>
+      <p>
+        Este fragmento resume la parte más importante del código en Python: el cálculo por
+        diferencias finitas, el registro del antinodo y la estimación de la frecuencia simulada
+        mediante máximos consecutivos.
+      </p>
+      <pre class="code-block"><code>v = np.sqrt(FT / mu)
+f_teo = n * v / (2 * L)
+T = 1 / f_teo
+
+dt = 0.90 * dx / v
+alpha = v * dt / dx
+
+for j in range(pasos):
+    tiempo.append(j * dt)
+    amplitud.append(y_act[indice_antinodo])
+
+    for i in range(1, N - 1):
+        y_sig[i] = (
+            2.0 * y_act[i]
+            - y_ant[i]
+            + alpha**2 * (
+                y_act[i + 1]
+                - 2.0 * y_act[i]
+                + y_act[i - 1]
+            )
+        )
+
+    y_sig[0] = 0.0
+    y_sig[-1] = 0.0
+    y_ant[:] = y_act
+    y_act[:] = y_sig
+
+picos, _ = find_peaks(a_est, distance=int(0.80*T/dt))
+T_sim = t_est[picos[1]] - t_est[picos[0]]
+f_sim = 1 / T_sim
+error = abs(f_teo - f_sim) / f_teo * 100</code></pre>
+    </section>
+
+    <section class="section-card">
+      <h2>8. Análisis y conclusiones</h2>
+      <div class="analysis-grid">
+        <div class="analysis-card success-card">
+          <h3>Validación del método</h3>
+          <p>
+            El error entre la frecuencia teórica y la simulada es pequeño, por lo que el método
+            de diferencias finitas reproduce adecuadamente la oscilación del modo normal.
+          </p>
+        </div>
+        <div class="analysis-card">
+          <h3>Interpretación física</h3>
+          <p>
+            Los nodos permanecen fijos y los antinodos alcanzan amplitudes máximas. Esto confirma
+            la formación de una onda estacionaria para el modo de oscilación seleccionado.
+          </p>
+        </div>
+      </div>
     </section>
   </main>
 
